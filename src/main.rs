@@ -16,11 +16,13 @@ async fn main() {
     if let Some(font_name) = args.font_name {
         println!("Font name: {}", font_name);
     } else {
-        let font_names = FontScraper::get_font_names().await.unwrap();
-        let options: Vec<&str> = font_names.iter().map(|font| font.name.as_str()).collect();
-        let selected_font = Select::new("Select a font", options)
-            .prompt()
-            .unwrap();
-        println!("Selected font: {}", selected_font);
+        let fonts = FontScraper::get_font_names().await.unwrap();
+        let options: Vec<&str> = fonts.iter().map(|font| font.name.as_str()).collect();
+        let ans: Result<&str, InquireError> = Select::new("Select a font", options)
+            .prompt();
+        match ans {
+            Ok(choice) => println!("You selected {} Nerd Font!", choice),
+            Err(_) => println!("There was an error, please try again"),
+        }
     }
 }
