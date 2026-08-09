@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/KarnesTH/nf-installer/actions/workflows/ci.yaml">
-    <img src="https://github.com/KarnesTH/nf-installer/actions/workflows/ci.yml/badge.svg" alt="CI">
+    <img src="https://github.com/KarnesTH/nf-installer/actions/workflows/ci.yaml/badge.svg" alt="CI">
   </a>
   <a href="https://github.com/KarnesTH/nf-installer/releases/latest">
     <img src="https://img.shields.io/github/v/release/KarnesTH/nf-installer" alt="Latest release">
