@@ -1,3 +1,4 @@
+<!--suppress HtmlDeprecatedAttribute -->
 <p align="center">
   <img src="assets/logo.svg" alt="nf-installer" width="120">
 </p>
@@ -14,7 +15,7 @@
     <img src="https://img.shields.io/github/v/release/KarnesTH/nf-installer" alt="Latest release">
   </a>
   <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/KarnesTH/nf-installer" alt="License">
+    <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
   </a>
   <img src="https://img.shields.io/badge/rust-2024%20edition-orange?logo=rust" alt="Rust">
 </p>
@@ -77,7 +78,7 @@ nf-installer --uninstall
 Fonts are installed into their own directory under the user font directory —
 `~/.local/share/fonts/<FontName>/` on Linux, `~/Library/Fonts/<FontName>/` on macOS — and registered with
 `fc-cache -f -v`. Uninstalling removes that directory and refreshes the cache again. The downloaded archive lives in the
-temp directory and is deleted afterwards, including when the extraction fails.
+temp directory and is deleted afterward, including when the extraction fails.
 
 The font list is scraped from nerdfonts.com once and then cached locally, so repeated runs start instantly instead of
 hitting the network:
