@@ -20,10 +20,6 @@ jobs:
             platform: linux-x86_64
           - runner: ubuntu-24.04-arm
             platform: linux-aarch64
-          - runner: macos-13
-            platform: macos-x86_64
-          - runner: macos-latest
-            platform: macos-aarch64
 
     steps:
       - uses: actions/checkout@v4

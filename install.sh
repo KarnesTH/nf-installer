@@ -18,7 +18,6 @@ detect_platform() {
 
     case "$(uname -s)" in
         Linux*)     os="linux" ;;
-        Darwin*)    os="macos" ;;
         *)          printf "${RED}Error: Unsupported operating system${NC}\n" >&2; exit 1 ;;
     esac
 
