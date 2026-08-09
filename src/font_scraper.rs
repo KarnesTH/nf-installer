@@ -9,6 +9,12 @@ pub struct Font {
     pub download_url: String,
 }
 
+impl std::fmt::Display for Font {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name)
+    }
+}
+
 pub struct FontScraper {}
 
 impl FontScraper {

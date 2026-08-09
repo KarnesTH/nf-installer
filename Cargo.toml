@@ -1,7 +1,11 @@
 [package]
-name = "nf_installer"
+name = "nf-installer"
 version = "0.1.0"
 edition = "2024"
+authors = ["KarnesTH"]
+license = "MIT"
+description = "A CLI helper to download and install Nerd Fonts"
+repository = "https://github.com/KarnesTH/nf-installer"
 
 [dependencies]
 chrono = { version = "0.4.45", features = ["serde"] }
@@ -13,3 +17,4 @@ scraper = "0.27.0"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 tokio = { version = "1.53.1", features = ["full"] }
+zip = "8.6.0"

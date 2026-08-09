@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/nf_installer.iml" filepath="$PROJECT_DIR$/.idea/nf_installer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/nf-installer.iml" filepath="$PROJECT_DIR$/.idea/nf-installer.iml" />
     </modules>
   </component>
 </project>
