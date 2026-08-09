@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="nf-installer logo">
+  <title>nf-installer</title>
+
+  <rect x="16" y="16" width="224" height="224" rx="32" fill="#0c0a11" stroke="#241b2e" stroke-width="3"/>
+
+  <!-- download arrow as an outline -->
+  <path d="M84 44 H172 V140 H194 L128 186 L62 140 H84 Z" fill="none" stroke="#b210f2"
+        stroke-width="12" stroke-linejoin="round"/>
+
+  <!-- the letterform inside the shaft -->
+  <g fill="none" stroke="#EDE9F2" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M100 124 L128 60 L156 124"/>
+    <path d="M109 104 H147"/>
+  </g>
+
+  <!-- the system it lands in -->
+  <path d="M60 198 V216 H196 V198" fill="none" stroke="#EDE9F2" stroke-width="11"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

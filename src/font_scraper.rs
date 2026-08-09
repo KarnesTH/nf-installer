@@ -35,7 +35,7 @@ impl FontScraper {
 
         let names = document
             .select(&Selector::parse("span.nerd-font-invisible-text")?)
-            .map(|node| node.text().collect::<String>())
+            .map(|node| node.text().collect::<String>().trim().to_string())
             .collect::<Vec<String>>();
         let download_urls = document
             .select(&Selector::parse("a.nf-fa-download")?)

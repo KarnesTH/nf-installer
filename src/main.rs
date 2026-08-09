@@ -11,39 +11,63 @@ struct Args {
     font_name: Option<String>,
     #[arg(short, long, help = "Ignore cache and reload")]
     refresh: bool,
+    #[arg(short, long, help = "Uninstall an installed Nerd Font")]
+    uninstall: bool,
 }
 
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
 
-    let fonts = match FontCache::get(args.refresh).await {
-        Ok(fonts) => fonts,
-        Err(e) => {
-            eprintln!("Could not load the font list: {e}");
-            std::process::exit(1);
-        }
+    let result = if args.uninstall {
+        run_uninstall(&args)
+    } else {
+        run_install(&args).await
     };
+
+    if let Err(e) = result {
+        eprintln!("{e}");
+        std::process::exit(1);
+    }
+}
+
+async fn run_install(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
+    let fonts = FontCache::get(args.refresh).await?;
 
     let font = match &args.font_name {
         Some(name) => fonts
             .into_iter()
-            .find(|font| font.name.eq_ignore_ascii_case(name)),
-        None => Select::new("Select a font", fonts).prompt().ok(),
-    };
-
-    let Some(font) = font else {
-        eprintln!("Font not found");
-        std::process::exit(1);
+            .find(|font| font.name.eq_ignore_ascii_case(name))
+            .ok_or("Font not found")?,
+        None => Select::new("Select a font", fonts).prompt()?,
     };
 
     println!("Installing {}...", font.name);
+    let installed = FontInstaller::install(&font).await?;
+    println!("Installed {} font files for {}", installed, font.name);
 
-    match FontInstaller::install(&font).await {
-        Ok(count) => println!("Installed {} font files for {}", count, font.name),
-        Err(e) => {
-            eprintln!("Installation failed: {e}");
-            std::process::exit(1);
-        }
+    Ok(())
+}
+
+fn run_uninstall(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
+    let installed = FontInstaller::installed()?;
+
+    if installed.is_empty() {
+        return Err("No installed fonts found".into());
     }
+
+    let name = match &args.font_name {
+        Some(name) => installed
+            .iter()
+            .find(|installed| installed.eq_ignore_ascii_case(name))
+            .cloned()
+            .ok_or("Font not installed")?,
+        None => Select::new("Select a font to uninstall", installed).prompt()?,
+    };
+
+    println!("Uninstalling {}...", name);
+    let removed = FontInstaller::uninstall(&name)?;
+    println!("Removed {} font files for {}", removed, name);
+
+    Ok(())
 }
