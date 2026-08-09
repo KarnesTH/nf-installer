@@ -7,7 +7,7 @@
 <p align="center">Install Nerd Fonts from your terminal, without the copy-and-cache dance.</p>
 
 <p align="center">
-  <a href="https://github.com/KarnesTH/nf-installer/actions/workflows/ci.yml">
+  <a href="https://github.com/KarnesTH/nf-installer/actions/workflows/ci.yaml">
     <img src="https://github.com/KarnesTH/nf-installer/actions/workflows/ci.yml/badge.svg" alt="CI">
   </a>
   <a href="https://github.com/KarnesTH/nf-installer/releases/latest">
