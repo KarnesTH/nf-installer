@@ -1,17 +1,25 @@
-use std::fs::File;
+use std::ffi::OsStr;
+use std::fs::{self, File};
 use std::io::{self, BufWriter, Write};
 use std::path::Path;
 
 use indicatif::{ProgressBar, ProgressStyle};
 use zip::ZipArchive;
 
-const FONT_EXTENSIONS: [&str; 2] = ["ttf", "otf"];
+pub const FONT_EXTENSIONS: [&str; 2] = ["ttf", "otf"];
+pub const WEB_EXTENSIONS: [&str; 1] = ["woff2"];
+
+const ARCHIVE_EXTENSION: &str = "zip";
 const WRITE_BUFFER_SIZE: usize = 64 * 1024;
 const EXTRACT_TEMPLATE: &str = "{msg:<12} [{bar:30}] {pos}/{len}";
 const PROGRESS_CHARS: &str = "=> ";
 
-/// Extracts all font files from the archive, ignoring the directory layout inside it.
-pub fn extract(archive_path: &Path, target: &Path) -> Result<usize, Box<dyn std::error::Error>> {
+/// Extracts all matching files from the archive, ignoring the directory layout inside it.
+pub fn extract(
+    archive_path: &Path,
+    target: &Path,
+    extensions: &[&str],
+) -> Result<usize, Box<dyn std::error::Error>> {
     let mut archive = ZipArchive::new(File::open(archive_path)?)?;
     let entries = archive.len();
     let mut extracted = 0;
@@ -31,7 +39,7 @@ pub fn extract(archive_path: &Path, target: &Path) -> Result<usize, Box<dyn std:
             continue;
         };
 
-        if !is_font_file(&name) {
+        if !has_extension(&name, extensions) {
             continue;
         }
 
@@ -47,10 +55,51 @@ pub fn extract(archive_path: &Path, target: &Path) -> Result<usize, Box<dyn std:
     Ok(extracted)
 }
 
-/// Checks whether the file name carries a font extension.
-fn is_font_file(name: &std::ffi::OsStr) -> bool {
+/// Copies font files from a single file or a directory into the target.
+pub fn copy_fonts(source: &Path, target: &Path) -> Result<usize, Box<dyn std::error::Error>> {
+    if source.is_file() {
+        return copy_font_file(source, target);
+    }
+
+    let mut copied = 0;
+
+    for entry in fs::read_dir(source)? {
+        let path = entry?.path();
+
+        if path.is_file() {
+            copied += copy_font_file(&path, target)?;
+        }
+    }
+
+    Ok(copied)
+}
+
+/// Copies a single file if it carries a font extension.
+fn copy_font_file(path: &Path, target: &Path) -> Result<usize, Box<dyn std::error::Error>> {
+    let Some(name) = path.file_name() else {
+        return Ok(0);
+    };
+
+    if !has_extension(name, &FONT_EXTENSIONS) {
+        return Ok(0);
+    }
+
+    fs::copy(path, target.join(name))?;
+
+    Ok(1)
+}
+
+/// Checks whether the path points to a zip archive.
+pub fn is_archive(path: &Path) -> bool {
+    path.extension()
+        .and_then(|ext| ext.to_str())
+        .is_some_and(|ext| ext.eq_ignore_ascii_case(ARCHIVE_EXTENSION))
+}
+
+/// Checks whether the file name carries one of the given extensions.
+fn has_extension(name: &OsStr, extensions: &[&str]) -> bool {
     Path::new(name)
         .extension()
         .and_then(|ext| ext.to_str())
-        .is_some_and(|ext| FONT_EXTENSIONS.contains(&ext.to_lowercase().as_str()))
+        .is_some_and(|ext| extensions.contains(&ext.to_lowercase().as_str()))
 }

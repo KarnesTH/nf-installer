@@ -24,7 +24,7 @@ impl<T: Serialize + DeserializeOwned> Cache<T> {
     ) -> Result<Vec<T>, Box<dyn std::error::Error>>
     where
         F: FnOnce() -> Fut,
-        Fut: Future<Output=Result<Vec<T>, Box<dyn std::error::Error>>>,
+        Fut: Future<Output = Result<Vec<T>, Box<dyn std::error::Error>>>,
     {
         let mut cached = Self::load(name);
 

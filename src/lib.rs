@@ -7,8 +7,12 @@ use clap::{Args, Parser, Subcommand};
 use inquire::Select;
 
 use crate::core::installer::FontInstaller;
-use crate::core::sources::FontSource;
+use crate::core::sources::google_fonts::GoogleFonts;
 use crate::core::sources::nerd_fonts::NerdFonts;
+use crate::core::sources::{FontSource, local};
+use crate::core::web::WebAssets;
+
+const DEFAULT_WEB_DIR: &str = "assets/fonts";
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -63,8 +67,10 @@ struct GoogleArgs {
 
 #[derive(Args, Debug)]
 struct LocalArgs {
-    #[arg(help = "Path to an archive or font file")]
+    #[arg(help = "Path to an archive, font file or directory")]
     path: PathBuf,
+    #[arg(short, long, help = "Name to install under, defaults to the file name")]
+    name: Option<String>,
 }
 
 #[derive(Args, Debug)]
@@ -133,20 +139,64 @@ impl Cli {
 
         println!("Installing {}...", font.name);
         let archive = source.fetch(&font).await?;
-        let installed = FontInstaller::install(&font.name, &archive)?;
+        let installed = FontInstaller::install_downloaded(&font.name, &archive)?;
         println!("Installed {} font files for {}", installed, font.name);
 
         Ok(())
     }
 
     /// Fetches a Google Font, either into the system or into a project directory.
-    async fn google(_args: &GoogleArgs) -> Result<(), Box<dyn std::error::Error>> {
-        Err("Google Fonts are not implemented yet".into())
+    async fn google(args: &GoogleArgs) -> Result<(), Box<dyn std::error::Error>> {
+        let variants = args.weights.clone();
+        let source = if args.web {
+            GoogleFonts::web(variants)
+        } else {
+            GoogleFonts::system(variants)
+        };
+
+        let fonts = source.list(args.refresh).await?;
+
+        let font = match &args.font_name {
+            Some(name) => fonts
+                .into_iter()
+                .find(|font| font.name.eq_ignore_ascii_case(name))
+                .ok_or("Font family not found")?,
+            None => Select::new("Select a font family", fonts).prompt()?,
+        };
+
+        let archive = source.fetch(&font).await?;
+
+        if args.web {
+            let out = args
+                .out
+                .clone()
+                .unwrap_or_else(|| PathBuf::from(DEFAULT_WEB_DIR));
+
+            println!("Writing {} to {}...", font.name, out.display());
+            WebAssets::write(&font.name, &archive, &out).await?;
+        } else {
+            println!("Installing {}...", font.name);
+            let installed = FontInstaller::install_downloaded(&font.name, &archive)?;
+            println!("Installed {} font files for {}", installed, font.name);
+        }
+
+        Ok(())
     }
 
-    /// Installs fonts from a local archive or font file.
-    fn local(_args: &LocalArgs) -> Result<(), Box<dyn std::error::Error>> {
-        Err("Local installation is not implemented yet".into())
+    /// Installs fonts from a local archive, font file, or directory.
+    fn local(args: &LocalArgs) -> Result<(), Box<dyn std::error::Error>> {
+        local::validate(&args.path)?;
+
+        let name = match &args.name {
+            Some(name) => name.clone(),
+            None => local::name_from(&args.path)?,
+        };
+
+        println!("Installing {}...", name);
+        let installed = FontInstaller::install_local(&name, &args.path)?;
+        println!("Installed {} font files for {}", installed, name);
+
+        Ok(())
     }
 
     /// Prints the installed fonts.

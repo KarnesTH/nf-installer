@@ -1,4 +1,6 @@
 pub mod archive;
+pub mod google_fonts;
+pub mod local;
 pub mod nerd_fonts;
 
 use std::path::PathBuf;

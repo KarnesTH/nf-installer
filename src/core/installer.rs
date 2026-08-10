@@ -8,17 +8,38 @@ use crate::core::sources::archive;
 pub struct FontInstaller;
 
 impl FontInstaller {
-    /// Extracts the archive into the font directory and registers the font.
-    /// Returns the number of installed files. The archive is removed afterward.
-    pub fn install(name: &str, archive_path: &Path) -> Result<usize, Box<dyn std::error::Error>> {
+    /// Extracts a downloaded archive into the font directory and registers the font.
+    /// The archive is removed afterward, including when the extraction fails.
+    pub fn install_downloaded(
+        name: &str,
+        archive_path: &Path,
+    ) -> Result<usize, Box<dyn std::error::Error>> {
         let target = Self::target_dir(name)?;
 
-        let result = archive::extract(archive_path, &target);
+        let result = archive::extract(archive_path, &target, &archive::FONT_EXTENSIONS);
         let _ = fs::remove_file(archive_path);
         let installed = result?;
 
-        println!("Installed to {}", target.display());
-        Self::refresh_font_cache()?;
+        Self::finish(&target)?;
+
+        Ok(installed)
+    }
+
+    /// Installs fonts from a local archive, font file or directory. The source is left in place.
+    pub fn install_local(name: &str, path: &Path) -> Result<usize, Box<dyn std::error::Error>> {
+        let target = Self::target_dir(name)?;
+
+        let installed = if archive::is_archive(path) {
+            archive::extract(path, &target, &archive::FONT_EXTENSIONS)?
+        } else {
+            archive::copy_fonts(path, &target)?
+        };
+
+        if installed == 0 {
+            return Err("No font files found".into());
+        }
+
+        Self::finish(&target)?;
 
         Ok(installed)
     }
@@ -59,6 +80,13 @@ impl FontInstaller {
         names.sort();
 
         Ok(names)
+    }
+
+    /// Reports the target directory and refreshes the font cache.
+    fn finish(target: &Path) -> Result<(), Box<dyn std::error::Error>> {
+        println!("Installed to {}", target.display());
+
+        Self::refresh_font_cache()
     }
 
     /// Returns the user font directory.
